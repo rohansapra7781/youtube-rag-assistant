@@ -48,14 +48,14 @@ def build_rag_chain_from_docs(raw_docs, video_key: str):
     retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={"k": 4})
 
     api_key = os.environ.get("GOOGLE_API_KEY")
-    model = ChatGoogleGenerativeAI(model="gemini-2.5-flash", google_api_key=api_key)
+    model = ChatGoogleGenerativeAI(model="gemini-3.5-flash-lite", google_api_key=api_key)
     parser = StrOutputParser()
 
     prompt = ChatPromptTemplate.from_messages([
         ("system", """You are a helpful assistant analyzing a YouTube video.
 Answer the user's question using only the retrieved context below.
 Cite relevant timestamps like [MM:SS] whenever possible.
-If the context is insufficient, state that the video does not cover the topic.
+If the context is insufficient, state that the video does not cover the topic. Always answer in english, no matter what the transcript language is.
 
 Context:
 {context}"""),
