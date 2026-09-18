@@ -65,7 +65,7 @@ def setup_rag_chain(video_id: str, languages: list):
     # Vector Store & Retriever
     api_key = os.environ.get("GOOGLE_API_KEY")
     embedding_model = GoogleGenerativeAIEmbeddings(
-        model="text-embedding-004",
+        model="gemini-embedding-001",
         google_api_key=api_key
     )
     vector_store = FAISS.from_documents(chunks, embedding_model)
