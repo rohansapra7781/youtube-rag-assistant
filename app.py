@@ -45,7 +45,7 @@ def build_rag_chain_from_docs(raw_docs, video_key: str):
 
     embedding_model = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
     vector_store = FAISS.from_documents(chunks, embedding_model)
-    retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={"k": 4})
+    retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={"k": 8})
 
     api_key = os.environ.get("GOOGLE_API_KEY")
     model = ChatGoogleGenerativeAI(model="gemini-3.5-flash-lite", google_api_key=api_key)
@@ -125,7 +125,31 @@ with st.sidebar:
         process_text_btn = st.button("Index Transcript", type="primary")
 
         if process_text_btn and manual_text.strip():
-            raw_docs = [Document(page_content=manual_text, metadata={"timestamp": "00:00"})]
+            raw_docs = []
+            current_ts = "00:00"
+            lines = manual_text.splitlines()
+            ts_pattern = re.compile(r"^\s*(\d{1,2}:\d{2}(?::\d{2})?)\s*$")
+
+            buffer = []
+            for line in lines:
+                line_str = line.strip()
+                if not line_str:
+                    continue
+                match = ts_pattern.match(line_str)
+                if match:
+                    if buffer:
+                        raw_docs.append(Document(page_content=" ".join(buffer), metadata={"timestamp": current_ts}))
+                        buffer = []
+                    current_ts = match.group(1)
+                else:
+                    buffer.append(line_str)
+
+            if buffer:
+                raw_docs.append(Document(page_content=" ".join(buffer), metadata={"timestamp": current_ts}))
+
+            if not raw_docs:
+                raw_docs = [Document(page_content=manual_text, metadata={"timestamp": "00:00"})]
+
             base_chain = build_rag_chain_from_docs(raw_docs, "manual_input")
             st.session_state.conversational_chain = RunnableWithMessageHistory(
                 base_chain,
