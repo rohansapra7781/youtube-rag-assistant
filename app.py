@@ -3,7 +3,8 @@ import re
 import streamlit as st
 from dotenv import load_dotenv
 from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled
-from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain_community.chat_message_histories import ChatMessageHistory
@@ -64,10 +65,8 @@ def setup_rag_chain(video_id: str, languages: list):
 
     # Vector Store & Retriever
     api_key = os.environ.get("GOOGLE_API_KEY")
-    embedding_model = GoogleGenerativeAIEmbeddings(
-        model="gemini-embedding-001",
-        google_api_key=api_key
-    )
+    embedding_model = HuggingFaceBgeEmbeddings(model_name="all-MiniLM-L6-v2")
+    
     vector_store = FAISS.from_documents(chunks, embedding_model)
     retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={"k": 4})
 
