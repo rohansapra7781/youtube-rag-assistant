@@ -62,14 +62,14 @@ def setup_rag_chain(video_id: str, languages: list):
     retriever = vector_store.as_retriever(search_type="similarity", search_kwargs={"k": 4})
 
     # 4. Model & Conversational Prompt
-    model = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
+    model = ChatGoogleGenerativeAI(model="gemini-3.5-flash-lite")
     parser = StrOutputParser()
 
     prompt = ChatPromptTemplate.from_messages([
         ("system", """You are a helpful assistant analyzing a YouTube video.
 Answer the user's question using only the retrieved context below.
 Each context chunk includes a timestamp prefix like [MM:SS]. Cite relevant timestamps in your answer whenever possible so the user knows where in the video the topic occurs.
-If the context is insufficient, state that the video does not cover the topic.
+If the context is insufficient, state that the video does not cover the topic. Answer in English language, no matter what is the language of the transcript.
 
 Context:
 {context}"""),
